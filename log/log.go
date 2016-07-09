@@ -88,10 +88,10 @@ func newStdHandler() *StreamHandler {
 	return h
 }
 
-var std = NewDefault(newStdHandler())
+var defLoger = NewDefault(newStdHandler())
 
 func Close() {
-	std.Close()
+	defLoger.Close()
 }
 
 func (l *Logger) run() {
@@ -151,16 +151,6 @@ func (l *Logger) SetLevel(level LogLever) {
 
 func (l *Logger) Level() LogLever {
 	return l.level
-}
-
-func (l *Logger) SetLogFile(logFile string) {
-	if logFile != "" {
-		fileHandler, err := NewTimeRotatingFileHandler(logFile, WhenDay, 1)
-		if err != nil {
-			return
-		}
-		l.handler = fileHandler
-	}
 }
 
 func (l *Logger) Output(callDepth int, level LogLever, format string, v ...interface{}) {
@@ -273,33 +263,52 @@ func (l *Logger) Error(format string, v ...interface{}) {
 }
 
 func SetLevel(level LogLever) {
-	std.SetLevel(level)
+	defLoger.SetLevel(level)
 }
 
 func SetLogFile(logFile string) {
-	std.SetLogFile(logFile)
+	if defLoger != nil {
+		defLoger.Close()
+	}
+
+	var h Handler
+
+	if len(logFile) != 0 {
+		var err error
+		h, err = NewTimeRotatingFileHandler(logFile, WhenDay, 1)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+	}
+
+	if h == nil {
+		h = newStdHandler()
+	}
+
+	defLoger = NewDefault(h)
 }
 
 func Debug(format string, v ...interface{}) {
-	std.Output(2, LevelDebug, format, v...)
+	defLoger.Output(2, LevelDebug, format, v...)
 }
 
 func Info(format string, v ...interface{}) {
-	std.Output(2, LevelInfo, format, v...)
+	defLoger.Output(2, LevelInfo, format, v...)
 }
 
 func Warn(format string, v ...interface{}) {
-	std.Output(2, LevelWarn, format, v...)
+	defLoger.Output(2, LevelWarn, format, v...)
 }
 
 func Error(format string, v ...interface{}) {
-	std.Output(2, LevelError, format, v...)
+	defLoger.Output(2, LevelError, format, v...)
 }
 
 func StdLogger() *Logger {
-	return std
+	return defLoger
 }
 
 func GetLevel() LogLever {
-	return std.level
+	return defLoger.level
 }

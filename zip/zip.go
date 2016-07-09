@@ -75,6 +75,8 @@ func (z *zipper) zipFile(path string, f os.FileInfo, err error) error {
 		return err
 	}
 
+	path = strings.Replace(path, "\\", "/", -1)
+
 	fileName := strings.TrimPrefix(path, z.srcFolder+"/")
 	if z.shouldSkip(fileName) {
 		log.Info("skip file [%v]", fileName)

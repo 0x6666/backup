@@ -58,6 +58,10 @@ func newZipFilename(taskName string) string {
 	return taskName + "-" + time.Now().Format(nameFormat) + ".zip"
 }
 
+func newLogFilename(taskName string) string {
+	return taskName + "-" + time.Now().Format(nameFormat) + ".log"
+}
+
 func doTask(task *config.Task) error {
 
 	log.Info("start task [%v]", task.Name)
@@ -85,6 +89,7 @@ func doTask(task *config.Task) error {
 			destFilePath = destFilePath + "/"
 		}
 		destFilePath = destFilePath + newZipFilename(task.Name)
+
 	} else {
 		if fileInfo.IsDir() {
 			ch := destFilePath[len(destFilePath)-1]
@@ -96,6 +101,11 @@ func doTask(task *config.Task) error {
 			//todo
 			os.Remove(destFilePath)
 		}
+	}
+
+	if task.Log {
+		log.SetLogFile(destFilePath + ".log")
+		defer log.SetLogFile("")
 	}
 
 	return zip.ZipFolder(task.Src, destFilePath, task.Skip)

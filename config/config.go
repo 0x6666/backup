@@ -15,6 +15,7 @@ type Task struct {
 	Skip []string
 	Dest string
 	Sync bool
+	Log  bool `toml:"log2file"`
 }
 
 type Config struct {
