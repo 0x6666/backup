@@ -5,7 +5,6 @@ import (
 	"os"
 	"runtime"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -169,7 +168,7 @@ func (l *Logger) Output(callDepth int, level LogLever, format string, v ...inter
 	buf = append(buf, l.colorStop(level)...)
 	buf = append(buf, " - "...)
 
-	pc, file, line, ok := runtime.Caller(callDepth)
+	/*pc*/ _, file, line, ok := runtime.Caller(callDepth)
 	if !ok {
 		file = "???"
 		line = 0
@@ -188,13 +187,13 @@ func (l *Logger) Output(callDepth int, level LogLever, format string, v ...inter
 	buf = strconv.AppendInt(buf, int64(line), 10)
 	buf = append(buf, "] - "...)
 
-	if pc != 0 {
+	/*if pc != 0 {
 		f := runtime.FuncForPC(pc)
 		if f != nil {
 			funcNamePath := strings.Split(f.Name(), "/")
 			buf = append(buf, "["+funcNamePath[len(funcNamePath)-1]+"] - "...)
 		}
-	}
+	}*/
 
 	s := fmt.Sprintf(format, v...)
 

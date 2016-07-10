@@ -75,6 +75,7 @@ func (z *zipper) zipFile(path string, f os.FileInfo, err error) error {
 		return err
 	}
 
+	//os.PathSeparator
 	path = strings.Replace(path, "\\", "/", -1)
 
 	fileName := strings.TrimPrefix(path, z.srcFolder+"/")

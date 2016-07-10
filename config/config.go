@@ -10,12 +10,13 @@ import (
 )
 
 type Task struct {
-	Name string
-	Src  string
-	Skip []string
-	Dest string
-	Sync bool
-	Log  bool `toml:"log2file"`
+	Name  string
+	Src   string
+	Skip  []string
+	Dest  string
+	Sync  bool
+	Log   bool `toml:"log2file"`
+	Count int
 }
 
 type Config struct {

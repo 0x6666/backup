@@ -5,4 +5,5 @@ src = "/home/inimei/workspace/inimei"
 skip = ["tmp", ".git", ".vscode", ".bundle", ".idea", "vendor"]
 dest = "/home/inimei/tmp"
 sync = false
-log2file = true
+log2file = true # 是否输出日志文件
+count = 2 #保留的备份天数

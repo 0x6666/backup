@@ -2,9 +2,12 @@ package main
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
+
+	"strings"
 
 	"github.com/inimei/backup/config"
 	"github.com/inimei/backup/log"
@@ -58,10 +61,6 @@ func newZipFilename(taskName string) string {
 	return taskName + "-" + time.Now().Format(nameFormat) + ".zip"
 }
 
-func newLogFilename(taskName string) string {
-	return taskName + "-" + time.Now().Format(nameFormat) + ".log"
-}
-
 func doTask(task *config.Task) error {
 
 	log.Info("start task [%v]", task.Name)
@@ -75,7 +74,7 @@ func doTask(task *config.Task) error {
 		return errors.New("dest path is empty")
 	}
 
-	//todo
+	//TODO: windows
 	destFilePath := task.Dest
 	fileInfo, err := os.Stat(destFilePath)
 	if os.IsNotExist(err) {
@@ -98,7 +97,7 @@ func doTask(task *config.Task) error {
 			}
 			destFilePath = destFilePath + newZipFilename(task.Name)
 		} else {
-			//todo
+			//TODO: backup
 			os.Remove(destFilePath)
 		}
 	}
@@ -108,5 +107,94 @@ func doTask(task *config.Task) error {
 		defer log.SetLogFile("")
 	}
 
-	return zip.ZipFolder(task.Src, destFilePath, task.Skip)
+	err = zip.ZipFolder(task.Src, destFilePath, task.Skip)
+
+	if err != nil {
+		return err
+	}
+
+	return clean(task)
+}
+
+func clean(task *config.Task) error {
+
+	if task.Sync == true || task.Count <= 0 {
+		return nil
+	}
+
+	destPath := task.Dest
+	fileInfo, err := os.Stat(destPath)
+	if err != nil {
+		log.Error("get dest file path info failed: %v", err)
+		return err
+	}
+
+	if !fileInfo.IsDir() {
+		return nil
+	}
+
+	files, err := listDir(destPath, task)
+	if err != nil {
+		return err
+	}
+
+	var lastTime time.Time
+
+	for _, t := range files {
+		if lastTime.Before(t) {
+			lastTime = t
+		}
+	}
+
+	for path, t := range files {
+		if lastTime.Sub(t) <= time.Hour*24*time.Duration(task.Count) {
+			continue
+		}
+
+		if err := os.Remove(path); err != nil {
+			log.Error("clean file [%v] failed: %v", path, err)
+		}
+	}
+
+	return nil
+}
+
+func listDir(dirPath string, task *config.Task) (map[string]time.Time, error) {
+	files := map[string]time.Time{}
+
+	dir, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		log.Error("ReadDir [%v] failed: %v", dirPath, err)
+		return nil, err
+	}
+
+	taskName := task.Name
+
+	PthSep := string(os.PathSeparator)
+	for _, fi := range dir {
+		if fi.IsDir() {
+			continue
+		}
+
+		name := fi.Name()
+		if strings.HasSuffix(name, ".zip.log") {
+			t, err := time.Parse(taskName+"-"+nameFormat+".zip.log", name)
+			if err != nil {
+				log.Error("parse file name [%v] failed: %v", name, err)
+				continue
+			}
+			files[dirPath+PthSep+name] = t
+			continue
+		}
+
+		if strings.HasSuffix(name, ".zip") {
+			t, err := time.Parse(taskName+"-"+nameFormat+".zip", name)
+			if err != nil {
+				log.Error("parse file name [%v] failed: %v", name, err)
+				continue
+			}
+			files[dirPath+PthSep+name] = t
+		}
+	}
+	return files, nil
 }
