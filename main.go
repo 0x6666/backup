@@ -147,7 +147,7 @@ func clean(task *config.Task) error {
 	}
 
 	for path, t := range files {
-		if lastTime.Sub(t) <= time.Hour*24*time.Duration(task.Count) {
+		if lastTime.Sub(t) < time.Hour*24*time.Duration(task.Count) {
 			continue
 		}
 
