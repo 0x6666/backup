@@ -16,6 +16,7 @@ const (
 	LevelDebug LogLever = 1 << 1
 	LevelWarn  LogLever = 1 << 2
 	LevelError LogLever = 1 << 3
+	LevelAll   LogLever = LevelInfo | LevelDebug | LevelWarn | LevelError
 )
 
 const TimeFormat = "2006/01/02 15:04:05"
