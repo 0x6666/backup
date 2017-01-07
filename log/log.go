@@ -212,6 +212,7 @@ func (l *Logger) colorStart(level LogLever) string {
 	switch level {
 	case LevelDebug:
 	case LevelInfo:
+		return GREEN
 	case LevelWarn:
 		return YELLOW
 	case LevelError:
@@ -224,6 +225,7 @@ func (l *Logger) colorStop(level LogLever) string {
 	switch level {
 	case LevelDebug:
 	case LevelInfo:
+		return NONE
 	case LevelWarn:
 		return NONE
 	case LevelError:
