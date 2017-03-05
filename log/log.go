@@ -153,7 +153,7 @@ func (l *Logger) Level() LogLever {
 	return l.level
 }
 
-func (l *Logger) Output(callDepth int, level LogLever, format string, v ...interface{}) {
+func (l *Logger) Output(ln bool, callDepth int, level LogLever, format string, v ...interface{}) {
 	if l.level&level != level {
 		return
 	}
@@ -161,6 +161,9 @@ func (l *Logger) Output(callDepth int, level LogLever, format string, v ...inter
 	buf := l.popBuf()
 
 	now := time.Now().Format(TimeFormat)
+	if ln {
+		buf = append(buf, "\033[1A"...)
+	}
 	buf = append(buf, now...)
 	buf = append(buf, " - "...)
 
@@ -169,7 +172,8 @@ func (l *Logger) Output(callDepth int, level LogLever, format string, v ...inter
 	buf = append(buf, l.colorStop(level)...)
 	buf = append(buf, " - "...)
 
-	/*pc*/ _, file, line, ok := runtime.Caller(callDepth)
+	/*pc*/
+	_, file, line, ok := runtime.Caller(callDepth)
 	if !ok {
 		file = "???"
 		line = 0
@@ -199,6 +203,10 @@ func (l *Logger) Output(callDepth int, level LogLever, format string, v ...inter
 	s := fmt.Sprintf(format, v...)
 
 	buf = append(buf, s...)
+
+	if ln {
+		buf = append(buf, "\033[K"...)
+	}
 
 	if len(s) == 0 || s[len(s)-1] != '\n' {
 		buf = append(buf, '\n')
@@ -249,19 +257,19 @@ func levelName(level LogLever) string {
 }
 
 func (l *Logger) Debug(format string, v ...interface{}) {
-	l.Output(2, LevelDebug, format, v...)
+	l.Output(false, 2, LevelDebug, format, v...)
 }
 
 func (l *Logger) Info(format string, v ...interface{}) {
-	l.Output(2, LevelInfo, format, v...)
+	l.Output(false, 2, LevelInfo, format, v...)
 }
 
 func (l *Logger) Warn(format string, v ...interface{}) {
-	l.Output(2, LevelWarn, format, v...)
+	l.Output(false, 2, LevelWarn, format, v...)
 }
 
 func (l *Logger) Error(format string, v ...interface{}) {
-	l.Output(2, LevelError, format, v...)
+	l.Output(false, 2, LevelError, format, v...)
 }
 
 func SetLevel(level LogLever) {
@@ -292,19 +300,23 @@ func SetLogFile(logFile string) {
 }
 
 func Debug(format string, v ...interface{}) {
-	defLoger.Output(2, LevelDebug, format, v...)
+	defLoger.Output(false, 2, LevelDebug, format, v...)
+}
+
+func DebugLine(format string, v ...interface{}) {
+	defLoger.Output(true, 2, LevelDebug, format, v...)
 }
 
 func Info(format string, v ...interface{}) {
-	defLoger.Output(2, LevelInfo, format, v...)
+	defLoger.Output(false, 2, LevelInfo, format, v...)
 }
 
 func Warn(format string, v ...interface{}) {
-	defLoger.Output(2, LevelWarn, format, v...)
+	defLoger.Output(false, 2, LevelWarn, format, v...)
 }
 
 func Error(format string, v ...interface{}) {
-	defLoger.Output(2, LevelError, format, v...)
+	defLoger.Output(false, 2, LevelError, format, v...)
 }
 
 func StdLogger() *Logger {
