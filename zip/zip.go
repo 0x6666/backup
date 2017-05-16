@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/inimei/backup/log"
+	"github.com/0x6666/backup/log"
 )
 
 const (
@@ -50,6 +50,7 @@ func copyContents(r io.Reader, w io.Writer) error {
 type zipper struct {
 	srcFolder string
 	skip      []string
+	content   bool
 	destFile  string
 	writer    *zip.Writer
 }
@@ -57,6 +58,17 @@ type zipper struct {
 func (z *zipper) shouldSkip(path string) bool {
 	if z.skip == nil {
 		return false
+	}
+
+	if z.content {
+		//use patten
+		for _, p := range z.skip {
+			if strings.HasPrefix(path, p) {
+				return false
+			}
+		}
+
+		return true
 	}
 
 	//use patten
@@ -136,13 +148,14 @@ func (z *zipper) zipFolder() error {
 
 // ZipFolder zips the given folder to the a zip file
 // with the given name
-func ZipFolder(srcFolder string, destFile string, skip []string) error {
+func ZipFolder(srcFolder string, destFile string, skip []string, isContent bool) error {
 	srcFolder = strings.TrimSuffix(srcFolder, "/")
 	srcFolder = strings.TrimSuffix(srcFolder, "\\")
 	z := &zipper{
 		srcFolder: srcFolder,
 		destFile:  destFile,
 		skip:      skip,
+		content:   isContent,
 	}
 	return z.zipFolder()
 }

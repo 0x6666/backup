@@ -5,18 +5,19 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/0x6666/backup/log"
 	"github.com/BurntSushi/toml"
-	"github.com/inimei/backup/log"
 )
 
 type Task struct {
-	Name  string
-	Src   string
-	Skip  []string
-	Dest  string
-	Sync  bool
-	Log   bool `toml:"log2file"`
-	Count int
+	Name      string
+	Src       string
+	Skip      []string `toml:"files"`
+	IsContent bool     `toml:"content"`
+	Dest      string
+	Sync      bool
+	Log       bool `toml:"log2file"`
+	Count     int
 }
 
 type Config struct {

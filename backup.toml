@@ -2,7 +2,8 @@
 [[Task]]
 name = "test"
 src = "/home/inimei/workspace/inimei"
-skip = ["tmp", ".git", ".vscode", ".bundle", ".idea", "vendor"]
+files = ["tmp", ".git", ".vscode", ".bundle", ".idea", "vendor"]
+content = true
 dest = "/home/inimei/tmp"
 sync = false
 log2file = true # 是否输出日志文件

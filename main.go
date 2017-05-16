@@ -9,9 +9,9 @@ import (
 
 	"strings"
 
-	"github.com/inimei/backup/config"
-	"github.com/inimei/backup/log"
-	"github.com/inimei/backup/zip"
+	"github.com/0x6666/backup/config"
+	"github.com/0x6666/backup/log"
+	"github.com/0x6666/backup/zip"
 )
 
 func cdCWD() error {
@@ -107,7 +107,7 @@ func doTask(task *config.Task) error {
 		defer log.SetLogFile("")
 	}
 
-	err = zip.ZipFolder(task.Src, destFilePath, task.Skip)
+	err = zip.ZipFolder(task.Src, destFilePath, task.Skip, task.IsContent)
 
 	if err != nil {
 		return err
